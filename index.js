@@ -23,6 +23,15 @@ const recordOptions = {
     })
 }
 
+const questions = {
+    reply_markup: JSON.stringify({
+        inline_keyboard: [
+            [{text: 'Да', callback_data: 'yes'},
+             {text: 'Нет', callback_data: 'no'},],
+        ]
+    })
+}
+
 const recordTime = {
     reply_markup: JSON.stringify({
         inline_keyboard: [
@@ -58,10 +67,12 @@ const start = () => {
         const chatId = msg.chat.id;
     
         if(text === '/start') {
+            marker = false;
             await bot.sendMessage(chatId, 'Добро пожаловать');
             return bot.sendMessage(chatId, 'Введите пожалуйста свое имя фамилию и отчество');
         }
         if (text === '/contacts') {
+            marker = false;
             //return bot.sendMessage(chatId, '@igorgagarin');
             //return bot.sendContact(chatId, '@igorgagarin')
             await bot.sendMessage(chatId, '@igorgagarin');
@@ -69,20 +80,23 @@ const start = () => {
         }
 
         if (text === '/record') {
+            marker = false;
             return startRecord(chatId);
         }
 
         if (text === '/again') {
+            marker = false;
             return startRecord(chatId);
         }
 
         if (input(text)) {
+            marker = false;
             bot.sendMessage(chatId, 'Хорошо, можете выбрать направление, которое Вас интересует');
             marker = true;
             chat[0] = text;
         }
 
-        if (calculateTheWords(text) === 3) {
+        if (calculateTheWords(text) >= 2) {
             bot.sendMessage(chatId, 'Введите свой номер телефона из 7 цифр без +38');
             let nIntervId = setInterval(() => {
                 if (marker) {
@@ -98,18 +112,30 @@ const start = () => {
         const chatId = msg.message.chat.id;
         if (Number(msg.data) >= 9 && Number(msg.data <= 18)) {
             //console.log(msg.from.username);
-            bot.sendMessage(chatId, `Хорошо, Вы записаны на ${msg.data}.00`);
+            await bot.sendMessage(chatId, `Хорошо, Вы записаны на ${msg.data}.00`);
             chat[1] = `${msg.data}.00`;
             chat[2] = `@${msg.from.username}`;
-            console.log(chat);
+            //console.log(chat);
             axios.post(uri_api, {
                 chat_id : CHAT_ID,
                 parse_mode : 'html',
                 text: `${chat[0]} ${chat[1]} ${chat[2]}`
             })
+            await bot.sendMessage(chatId, 'У Вас остались еще вопросы?');
+            await bot.sendMessage(chatId, 'Yes/No', questions);
             return;
         }
-        await bot.sendMessage(chatId, 'Выберите время', recordTime);
+        if (msg.data === 'yes') {
+            await bot.sendMessage(chatId, 'Связь с оператором');
+            await bot.sendMessage(chatId, '@igorgagarin');
+            return bot.sendContact(chatId, '+380956430546', 'Igor');
+        }  
+        if (msg.data === 'no') {
+            return;
+        }   
+        if (msg.data === 'consultation' || msg.data === 'diagnostics' || msg.data === 'information') {
+            await bot.sendMessage(chatId, 'Выберите время', recordTime);
+        }
 
     })
 }
@@ -118,14 +144,14 @@ start();
 
 
 function calculateTheWords(message) {
-
+  
     const splitMessage = message.split(" ");
     const wordsNumber = splitMessage.length;
     return(wordsNumber);
  }
 
 function input(phone) {
-    console.log(Number(phone));
+    //console.log(Number(phone));
     if(Number(phone) > 11111111 && Number(phone) < 389999999999) {
         return true;
     }
