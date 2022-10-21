@@ -67,12 +67,23 @@ const recordTime = {
     reply_markup: JSON.stringify({
         inline_keyboard: [
             [{text: '9.00', callback_data: '9'}, {text: '10.00', callback_data: '10'}, 
-            {text: '14.00', callback_data: '11'}],
+            {text: '11.00', callback_data: '11'}],
             [{text: '12.00', callback_data: '12'}, {text: '13.00', callback_data: '13'}, 
-            {text: '14.00', callback_data: '11'}],
-            [{text: '14.00', callback_data: '14'}, {text: '15.00', callback_data: '15'}, 
+            {text: '14.00', callback_data: '14'}],
+            [{text: '15.00', callback_data: '15'}, 
             {text: '16.00', callback_data: '16'}],
             [{text: '17.00', callback_data: '17'}, {text: '18.00', callback_data: '18'}],
+        ]
+    })
+};
+
+const recordDay = {
+    reply_markup: JSON.stringify({
+        inline_keyboard: [
+            [{text: 'Понедельник', callback_data: 'Понедельник'}, {text: 'Вторник', callback_data: 'Вторник'}],
+            [{text: 'Среда', callback_data: 'Среда'}, {text: 'Четверг', callback_data: 'Четверг'}],
+            [{text: 'Пятница', callback_data: 'Пятница'}, {text: 'Суббота', callback_data: 'Суббота'}],
+            [{text: 'Воскресенье', callback_data: 'Воскресенье'}],
         ]
     })
 };
@@ -156,25 +167,34 @@ let marker1, marker2, marker3;
             }, 2000);
     })
 
-
+let day;
     bot.on('callback_query', async msg => {
         const data = msg.data;
         const chatId = msg.message.chat.id;
         if (Number(msg.data) >= 9 && Number(msg.data <= 18)) {
             //console.log(msg.from.username);
-            await bot.sendMessage(chatId, `${e}, ${FIO}, ${f} ${msg.data}.00`);
+            await bot.sendMessage(chatId, `${e}, ${FIO}, ${f} ${msg.data}.00 в ${day}`);
             chat[1] = `${msg.data}.00`;
             chat[2] = `@${msg.from.username}`;
             chat[3] = FIO;
+            chat[4] = day;
             //console.log(chat);
             axios.post(uri_api, {
                 chat_id : CHAT_ID,
                 //перевірити без нього
                 parse_mode : 'html',
-                text: `${chat[3]} ${chat[0]} ${chat[1]} ${chat[2]}`
-            })
+                text: `${chat[3]} ${chat[0]} ${chat[1]} ${chat[2]} ${chat[4]}`
+            });
             await bot.sendMessage(chatId, `${g}`);
             await bot.sendMessage(chatId, 'Yes/No', questions);
+            day = msg.data;
+            setTimeout(() => {
+                if (msg.data === day) {
+                    bot.sendMessage(chatId, `«Всего Вам найлучшего ${chat[3]}. Ждем Вас в нашей
+                     клинике хрономедицины»`);
+                    return;
+                }
+            }, 30000);
             return;
         }
         if (msg.data === 'ru') {
@@ -206,13 +226,24 @@ let marker1, marker2, marker3;
         if (msg.data === 'yes') {
             await bot.sendMessage(chatId, `${t}`);
             await bot.sendMessage(chatId, '@igorgagarin');
-            return bot.sendContact(chatId, '+380956430546', 'Igor');
+            return bot.sendContact(chatId, '+380956430549', 'Igor');
         }  
         if (msg.data === 'no') {
+            await bot.sendMessage(chatId, `«Всего Вам найлучшего ${chat[3]}. Ждем Вас в нашей
+            клинике хрономедицины»`);
             return;
         }   
-        if (msg.data === 'consultation' || msg.data === 'diagnostics' || msg.data === 'information') {
+        if (msg.data === 'Понедельник' || msg.data === 'Вторник' || msg.data === 'Среда' || 
+            msg.data === 'Четверг' || msg.data === 'Пятница' || msg.data === 'Суббота'
+             ||  msg.data === 'Воскресенье') {
+            await bot.sendMessage(chatId, `Хорошо, Вы записаны на ${msg.data}`);
+            day = msg.data;
             await bot.sendMessage(chatId, `${d}`, recordTime);
+            return;
+        }
+        if (msg.data === 'consultation' || msg.data === 'diagnostics' || msg.data === 'information') {
+            await bot.sendMessage(chatId, `Выберите день`, recordDay);
+            return;
         }
 
     })
