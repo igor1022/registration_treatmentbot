@@ -1,16 +1,16 @@
 const TelegramApi = require('node-telegram-bot-api');
-const token = '5775566569:AAHOOy2wUS_idAAoTRwCcUCUT-T2_GA_Dmo';
+const token = '5322783432:AAEyHVbJKxsQq8LiY4lSTOrq3RikIvnJ3qk';
 const bot = new TelegramApi(token, {polling: true});
 const axios = require('axios');
 CHAT_ID = "-785368621"; 
 const uri_api = `https://api.telegram.org/bot${ token }/sendMessage`;
 
 
-let a, b, c, d, e, f, g, t, m, n, k;
+let a, b, c, d, e, f, g, t, m, n, k, i, j, v;
 
 // first question
 const startRecord = async (chatId) => {
-    await bot.sendMessage(chatId, 'Русский или Українська', language);
+    await bot.sendMessage(chatId, 'Виберіть мову - Сделайте выбор языка', language);
     return;
 }
 
@@ -94,10 +94,10 @@ const recordDay_ru = {
 const recordDay_ukr = {
     reply_markup: JSON.stringify({
         inline_keyboard: [
-            [{text: 'Понеділок', callback_data: 'Понедельник'}, {text: 'Вівторок', callback_data: 'Вторник'}],
-            [{text: 'Суреда', callback_data: 'Среда'}, {text: 'Четвер', callback_data: 'Четверг'}],
-            [{text: `П'ятниця`, callback_data: 'Пятница'}, {text: 'Субота', callback_data: 'Суббота'}],
-            [{text: 'Неділя', callback_data: 'Воскресенье'}],
+            [{text: 'Понеділок', callback_data: 'Понеділок'}, {text: 'Вівторок', callback_data: 'Вівторок'}],
+            [{text: 'Середа', callback_data: 'Середа'}, {text: 'Четвер', callback_data: 'Четвер'}],
+            [{text: `П'ятниця`, callback_data: `П'ятниця`}, {text: 'Субота', callback_data: 'Субота'}],
+            [{text: 'Неділя', callback_data: 'Неділя'}],
         ]
     })
 };
@@ -105,8 +105,8 @@ const recordDay_ukr = {
 const language = {
     reply_markup: JSON.stringify({
         inline_keyboard: [
-            [{text: 'Русский', callback_data: 'ru'},
-             {text: 'Українська', callback_data: 'ukr'},],
+            [{text: 'Українська', callback_data: 'ukr'},
+             {text: 'Русский', callback_data: 'ru'},],
         ]
     })
 }
@@ -114,14 +114,16 @@ const language = {
 const chat = [];
 let marker = false;
 
-
 const start = () => {
     bot.setMyCommands([
-        {command: '/start', description: 'Начать'},
-        {command: '/contacts', description: 'Контакты нашего консультанта'},
-        {command: '/record', description: 'Запись на консультацию'},
-        {command: '/again', description: 'Начать заново'}
-    ])
+        {command: '/start', description: 'Почати'},
+        {command: '/time', description: 'Графік роботи'},
+        {command: '/address', description: 'Адреса клініки'},
+        {command: '/items', description: 'Перелік хвороб'},
+        {command: '/contacts', description: "Зв'язатися з консультантом"},
+        {command: '/record', description: 'Записатися на консультацію'},
+        {command: '/again', description: 'Повернутися на початок'}
+    ]);
 
 //save Name answer
 
@@ -137,17 +139,39 @@ let marker1, marker2, marker3;
 //Itaration ONE
         if(text === '/start') {
             marker = false;
-            await bot.sendMessage(chatId, 'Добро пожаловать');
-            await bot.sendMessage(chatId, 'Русский или Українська', language);
+            await bot.sendMessage(chatId, 'Вітаємо Вас - Добро пожаловать');
+            await bot.sendMessage(chatId, 'Виберіть будь ласка мову - Сделайте выбор языка', language);
             return;
-           // 
+        // 
         }
 //Contacts reply        
         if (text === '/contacts') {
             marker = false;
-            await bot.sendMessage(chatId, '@igorgagarin');
+            await bot.sendMessage(chatId, '@YevhenDudar');
             //в конфігу прописати ім'я телефон
-            return bot.sendContact(chatId, '+380956430546', 'Igor');
+            return bot.sendContact(chatId, '+380952185444', 'Адміністрація');
+        }
+        if (text === '/time') {
+            marker = false;
+            await bot.sendMessage(chatId, 'Ми працюємо з 08:00 – 16:00');
+            //в конфігу прописати ім'я телефон
+            //return bot.sendContact(chatId, ' ', ' ');
+            return;
+        }
+        if (text === '/address') {
+            marker = false;
+            await bot.sendMessage(chatId, 'Ми знаходимося біля метро «Печерська» за адресою бульвар Лесі Українки, 26-Б, 2-е парадне (вхід), 6-й поверх, при виході з ліфта на ліво, офіс 645, на дверях написано зелений логотип «Резонанс»');
+            return;
+        }
+        if (text === '/price') {
+            marker = false;
+            await bot.sendMessage(chatId, 'Лікування коштує згідно з прайсом на сайті https://rezonans.net.ua/ru/czeny/');
+            return;
+        }
+        if (text === '/items') {
+            marker = false;
+            await bot.sendMessage(chatId, 'Перелік хвороб подивіться будь ласка на сайті https://rezonans.net.ua/ru/glavnaya/');
+            return;
         }
 
 //Registration
@@ -160,7 +184,7 @@ let marker1, marker2, marker3;
         if (text === '/again') {
             marker = false;
             return startRecord(chatId);
-        }//
+        }
         if (input(text)) {
             marker = false;
             bot.sendMessage(chatId, `${b}`);
@@ -187,7 +211,7 @@ let marker4 = false;
         const chatId = msg.message.chat.id;
         if (Number(msg.data) >= 9 && Number(msg.data <= 18)) {
             //console.log(msg.from.username);
-            await bot.sendMessage(chatId, `${e}, ${FIO}, ${f} ${msg.data}.00 в ${day}`);
+            await bot.sendMessage(chatId, `${e}, ${FIO}, ${f} ${day} ${msg.data}.00`);
             chat[1] = `${msg.data}.00`;
             chat[2] = `@${msg.from.username}`;
             chat[3] = FIO;
@@ -195,7 +219,6 @@ let marker4 = false;
             //console.log(chat);
             axios.post(uri_api, {
                 chat_id : CHAT_ID,
-                //перевірити без нього
                 parse_mode : 'html',
                 text: `${chat[3]} ${chat[0]} ${chat[1]} ${chat[2]} ${chat[4]}`
             });
@@ -204,11 +227,10 @@ let marker4 = false;
             day = msg.data;
             setTimeout(() => {
                 if (msg.data === day && !marker4) {
-                    bot.sendMessage(chatId, `«Всего Вам найлучшего ${chat[3]}. Ждем Вас в нашей
-                     клинике хрономедицины»`);
+                    bot.sendMessage(chatId, `${i} ${chat[3]}. ${j}`);
                     return;
                 }
-            }, 30000);
+            }, 15000);
             return;
         }
         if (msg.data === 'ru') {
@@ -226,6 +248,9 @@ let marker4 = false;
             m = 'Всего Вам найлучшего ';
             n = `Ждем Вас в нашей клинике хрономедицины`;
             k = 'Выберите день';
+            i = 'Всего Вам найлучшего';
+            j = 'Ждем Вас в нашей клинике хрономедицины';
+            v = 'Пожалуйста, воспользуйтесь меню, которое находится внизу слева';
             questions = questions_ru;
             return bot.sendMessage(chatId, 'Введите пожалуйста свое имя фамилию и отчество');
         }  
@@ -240,17 +265,20 @@ let marker4 = false;
             b = 'Добре, можете вибрати напрямок, який Вас цікавить';
             c = 'Виберіть';
             d = 'Виберіть час';
-            t = `Зв'язок з оператором`;
+            t = `Зв'язок з адміністрацією`;
             g = 'Добре Ви записані на ';
             m = 'Всього Вам найкращого ';
-            n = `Чекаємо Вас в нашій крініці хромомедицини`;
+            n = `Чекаємо Вас в нашій клініці хрономедицини`;
             k = 'Виберіть день';
-            return bot.sendMessage(chatId, `Введіть будь ласка своє ім'я фамілію та по-батькові`);
+            i = 'Всього Вам найкращого';
+            j = 'Чекаємо Вас в нашій клініці хрономедицини';
+            v = 'Будь ласка скористуйтеся меню, яке знаходиться внизу зліва';
+            return bot.sendMessage(chatId, `Введіть будь ласка своє ім'я прізвище та по батькові`);
         }    
         if (msg.data === 'yes') {
             await bot.sendMessage(chatId, `${t}`);
-            await bot.sendMessage(chatId, '@igorgagarin');
-            return bot.sendContact(chatId, '+380956430549', 'Igor');
+            await bot.sendMessage(chatId, '@YevhenDudar');
+            return bot.sendContact(chatId, '+380952185444', 'Адміністрація');
         }  
         if (msg.data === 'no') {
             await bot.sendMessage(chatId, `${m}${chat[3]}. ${n}`);
@@ -265,8 +293,22 @@ let marker4 = false;
             await bot.sendMessage(chatId, `${d}`, recordTime);
             return;
         }
-        if (msg.data === 'consultation' || msg.data === 'diagnostics' || msg.data === 'information') {
+
+        if (msg.data === 'Понеділок' || msg.data === 'Вівторок' || msg.data === 'Середа' || 
+            msg.data === 'Четвер' || msg.data === `П'ятница` || msg.data === 'Субота'
+             ||  msg.data === 'Неділя') {
+            await bot.sendMessage(chatId, `${g} ${msg.data}`);
+            day = msg.data;
+            await bot.sendMessage(chatId, `${d}`, recordTime);
+            return;
+        }
+
+        if (msg.data === 'consultation' || msg.data === 'diagnostics') {
             await bot.sendMessage(chatId, `${k}`, recordDay);
+            return;
+        }
+        if (msg.data === 'information') {
+            await bot.sendMessage(chatId, `${v}`);
             return;
         }
 
@@ -274,14 +316,6 @@ let marker4 = false;
 }
 
 start();
-
-
-// function calculateTheWords(message) {
-  
-//     const splitMessage = message.split(' ');
-//     const wordsNumber = splitMessage.length;
-//     return(wordsNumber);
-//  }
 
 //Check if number
 function input(phone) {
