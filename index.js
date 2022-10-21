@@ -6,7 +6,7 @@ CHAT_ID = "-785368621";
 const uri_api = `https://api.telegram.org/bot${ token }/sendMessage`;
 
 
-let a, b, c, d, e, f, g, t;
+let a, b, c, d, e, f, g, t, m, n, k;
 
 // first question
 const startRecord = async (chatId) => {
@@ -77,7 +77,9 @@ const recordTime = {
     })
 };
 
-const recordDay = {
+let recordDay = {};
+
+const recordDay_ru = {
     reply_markup: JSON.stringify({
         inline_keyboard: [
             [{text: 'Понедельник', callback_data: 'Понедельник'}, {text: 'Вторник', callback_data: 'Вторник'}],
@@ -88,6 +90,17 @@ const recordDay = {
     })
 };
 
+
+const recordDay_ukr = {
+    reply_markup: JSON.stringify({
+        inline_keyboard: [
+            [{text: 'Понеділок', callback_data: 'Понедельник'}, {text: 'Вівторок', callback_data: 'Вторник'}],
+            [{text: 'Суреда', callback_data: 'Среда'}, {text: 'Четвер', callback_data: 'Четверг'}],
+            [{text: `П'ятниця`, callback_data: 'Пятница'}, {text: 'Субота', callback_data: 'Суббота'}],
+            [{text: 'Неділя', callback_data: 'Воскресенье'}],
+        ]
+    })
+};
 
 const language = {
     reply_markup: JSON.stringify({
@@ -168,6 +181,7 @@ let marker1, marker2, marker3;
     })
 
 let day;
+let marker4 = false;
     bot.on('callback_query', async msg => {
         const data = msg.data;
         const chatId = msg.message.chat.id;
@@ -185,11 +199,11 @@ let day;
                 parse_mode : 'html',
                 text: `${chat[3]} ${chat[0]} ${chat[1]} ${chat[2]} ${chat[4]}`
             });
-            await bot.sendMessage(chatId, `${g}`);
+            //await bot.sendMessage(chatId, `${g}`);
             await bot.sendMessage(chatId, 'Yes/No', questions);
             day = msg.data;
             setTimeout(() => {
-                if (msg.data === day) {
+                if (msg.data === day && !marker4) {
                     bot.sendMessage(chatId, `«Всего Вам найлучшего ${chat[3]}. Ждем Вас в нашей
                      клинике хрономедицины»`);
                     return;
@@ -199,6 +213,7 @@ let day;
         }
         if (msg.data === 'ru') {
             recordOptions = recordOptions_ru;
+            recordDay = recordDay_ru;
             e = 'Хорошо';
             f = 'Вы записаны на';
             g = 'У Вас остались еще вопросы?';
@@ -206,12 +221,17 @@ let day;
             b = 'Хорошо, можете выбрать направление, которое Вас интересует';
             c = 'Выберите';
             d = 'Выберите время';
-            t = 'Связь с оператором'
+            t = 'Связь с оператором';
+            g = 'Хорошо, Вы записаны на '; 
+            m = 'Всего Вам найлучшего ';
+            n = `Ждем Вас в нашей клинике хрономедицины`;
+            k = 'Выберите день';
             questions = questions_ru;
             return bot.sendMessage(chatId, 'Введите пожалуйста свое имя фамилию и отчество');
         }  
         if (msg.data === 'ukr') {
             recordOptions = recordOptions_ukr;
+            recordDay = recordDay_ukr;
             questions = questions_ukr;
             e = 'Добре';
             f = 'Ви записані на';
@@ -221,6 +241,10 @@ let day;
             c = 'Виберіть';
             d = 'Виберіть час';
             t = `Зв'язок з оператором`;
+            g = 'Добре Ви записані на ';
+            m = 'Всього Вам найкращого ';
+            n = `Чекаємо Вас в нашій крініці хромомедицини`;
+            k = 'Виберіть день';
             return bot.sendMessage(chatId, `Введіть будь ласка своє ім'я фамілію та по-батькові`);
         }    
         if (msg.data === 'yes') {
@@ -229,20 +253,20 @@ let day;
             return bot.sendContact(chatId, '+380956430549', 'Igor');
         }  
         if (msg.data === 'no') {
-            await bot.sendMessage(chatId, `«Всего Вам найлучшего ${chat[3]}. Ждем Вас в нашей
-            клинике хрономедицины»`);
+            await bot.sendMessage(chatId, `${m}${chat[3]}. ${n}`);
+            marker4 = true;
             return;
         }   
         if (msg.data === 'Понедельник' || msg.data === 'Вторник' || msg.data === 'Среда' || 
             msg.data === 'Четверг' || msg.data === 'Пятница' || msg.data === 'Суббота'
              ||  msg.data === 'Воскресенье') {
-            await bot.sendMessage(chatId, `Хорошо, Вы записаны на ${msg.data}`);
+            await bot.sendMessage(chatId, `${g} ${msg.data}`);
             day = msg.data;
             await bot.sendMessage(chatId, `${d}`, recordTime);
             return;
         }
         if (msg.data === 'consultation' || msg.data === 'diagnostics' || msg.data === 'information') {
-            await bot.sendMessage(chatId, `Выберите день`, recordDay);
+            await bot.sendMessage(chatId, `${k}`, recordDay);
             return;
         }
 
