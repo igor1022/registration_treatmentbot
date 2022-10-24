@@ -295,7 +295,7 @@ let marker4 = false;
         }
 
         if (msg.data === 'Понеділок' || msg.data === 'Вівторок' || msg.data === 'Середа' || 
-            msg.data === 'Четвер' || msg.data === `П'ятница` || msg.data === 'Субота'
+            msg.data === 'Четвер' || msg.data === `П'ятниця` || msg.data === 'Субота'
              ||  msg.data === 'Неділя') {
             await bot.sendMessage(chatId, `${g} ${msg.data}`);
             day = msg.data;
